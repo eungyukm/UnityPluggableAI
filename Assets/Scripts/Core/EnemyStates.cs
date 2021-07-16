@@ -8,6 +8,14 @@ public class EnemyStates : MonoBehaviour
 
     public float lookRange;
 
+    public float attackRange;
+
+    public float attackForce;
+
+    public float searchingTurnSpeed;
+
+    public float searchingDuration;
+
     // Start is called before the first frame update
     void Start()
     {

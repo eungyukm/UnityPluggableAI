@@ -89,4 +89,9 @@ public class TankShooting : MonoBehaviour
 		// Reset the launch force.  This is a precaution in case of missing button events.
 		m_CurrentLaunchForce = m_MinLaunchForce;
 	}
+
+	public void Fire(float attackForce, float attackRange)
+    {
+
+    }
 }
