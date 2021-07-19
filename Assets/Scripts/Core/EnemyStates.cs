@@ -2,29 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyStates : MonoBehaviour
+[CreateAssetMenu(menuName = "PluggableAI/EnemyStats")]
+public class EnemyStates : ScriptableObject
 {
-    public float lookSphereCastRadius;
+	public float moveSpeed = 1;
+	public float lookRange = 40f;
+	public float lookSphereCastRadius = 1f;
 
-    public float lookRange;
+	public float attackRange = 1f;
+	public float attackRate = 1f;
+	public float attackForce = 15f;
+	public int attackDamage = 50;
 
-    public float attackRange;
-
-    public float attackForce;
-
-    public float searchingTurnSpeed;
-
-    public float searchingDuration;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	public float searchDuration = 4f;
+	public float searchingTurnSpeed = 120f;
 }

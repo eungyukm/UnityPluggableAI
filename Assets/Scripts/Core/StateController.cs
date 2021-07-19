@@ -24,11 +24,13 @@ public class StateController : MonoBehaviour
     [HideInInspector] public Transform chaseTarget;
     [HideInInspector] public float stateTimeElapsed;
     private bool aiActive;
+    private StateSO startState;
 
     private void Awake()
     {
         tankShooting = GetComponent<TankShooting>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        startState = currentState;
     }
 
     public void SetupAI(bool aiActivationFromTankManager, List<Transform> wayPointsFromTankManager)
@@ -57,7 +59,7 @@ public class StateController : MonoBehaviour
         if (currentState != null && eyes != null)
         {
             Gizmos.color = currentState.sceneGizmoColor;
-            Gizmos.DrawSphere(eyes.position, enemyStates.lookSphereCastRadius);
+            Gizmos.DrawWireSphere(eyes.position, enemyStates.lookSphereCastRadius);
         }
     }
 
