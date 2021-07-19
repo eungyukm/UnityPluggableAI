@@ -2,6 +2,7 @@
 
 public class TankMovement : MonoBehaviour
 {
+	public int m_PlayerNumber = 1;              // Used to identify which tank belongs to which player.  This is set by this tank's manager.
 	public float m_Speed = 12f;                 // How fast the tank moves forward and back.
 	public float m_TurnSpeed = 180f;            // How fast the tank turns in degrees per second.
 	public AudioSource m_MovementAudio;         // Reference to the audio source used to play engine sounds. NB: different to the shooting audio source.

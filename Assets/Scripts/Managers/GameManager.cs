@@ -16,7 +16,10 @@ public class GameManager : MonoBehaviour
 		
 	private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
 	private WaitForSeconds m_EndWait;           // Used to have a delay whilst the round or game ends.
-	private List<TankThinker> m_Tanks; 
+
+	public GameObject[] m_TankPrefabs;
+	public TankManager[] m_Tanks;
+	public List<Transform> wayPointsForAI;
 
 	private void Start()
 	{
@@ -37,23 +40,17 @@ public class GameManager : MonoBehaviour
 	/// </summary>
 	private void SpawnAllTanks()
 	{
-		var points = new List<Transform>(SpawnPoints); // creates a new instance of the transform list to hold spawn points
-
-		m_Tanks = new List<TankThinker>(); // list of tanks 
-		Debug.Log(GameState.Instance.players);
-
-		foreach (GameState.PlayerState state in GameState.Instance.players)
+		for (int i = 0; i < m_Tanks.Length; i++)
 		{
-			Debug.Log("Spawn Player");
-			var spawnPointIndex = Random.Range(0, points.Count); // chooses a random spawn point for each player (tank)
-
 			// ... create them, set their player number and references needed for control.
-			var tank = Instantiate(m_TankPrefab); // instantiates player with player prefab
-			tank.Setup(state, points[spawnPointIndex]); // Setup player and corresponding spawn point
+			m_Tanks[i].m_Instance =
+				Instantiate(m_TankPrefabs[i], m_Tanks[i].m_SpawnPoint.position, m_Tanks[i].m_SpawnPoint.rotation) as GameObject;
+			m_Tanks[i].m_PlayerNumber = i + 1;
 
-			points.RemoveAt(spawnPointIndex); // removes used spawn point
-
-			m_Tanks.Add(tank); // adds tank to tanks list
+			if (m_Tanks[i].isAI)
+				m_Tanks[i].SetupAI(wayPointsForAI);
+			else
+				m_Tanks[i].SetupPlayerTank(m_CameraControl);
 		}
 	}
 
@@ -61,14 +58,17 @@ public class GameManager : MonoBehaviour
 	private void SetCameraTargets()
 	{
 		// Create a collection of transforms the same size as the number of tanks.
-		m_CameraControl.m_Targets = new Transform[m_Tanks.Count];
+		Transform[] targets = new Transform[m_Tanks.Length];
 
 		// For each of these transforms...
-		for (int i = 0; i < m_Tanks.Count; i++)
+		for (int i = 0; i < targets.Length; i++)
 		{
 			// ... set it to the appropriate tank transform.
-			m_CameraControl.m_Targets[i] = m_Tanks[i].transform;
+			targets[i] = m_Tanks[i].m_Instance.transform;
 		}
+
+		// These are the targets the camera should follow.
+		m_CameraControl.m_Targets = targets;
 	}
 
 
@@ -154,20 +154,18 @@ public class GameManager : MonoBehaviour
 
 	private void EnableTankControl()
 	{
-		for (int i = 0; i < m_Tanks.Count; i++)
+		for (int i = 0; i < m_Tanks.Length; i++)
 		{
-			if (m_Tanks[i])
-				m_Tanks[i].enabled = true;
+			m_Tanks[i].EnableControl();
 		}
 	}
 
 
 	private void DisableTankControl()
 	{
-		for (int i = 0; i < m_Tanks.Count; i++)
+		for (int i = 0; i < m_Tanks.Length; i++)
 		{
-			if (m_Tanks[i])
-				m_Tanks[i].enabled = false;
+			m_Tanks[i].DisableControl();
 		}
 	}
 }
