@@ -11,13 +11,13 @@ public class GameManager : MonoBehaviour
 	public float m_EndDelay = 3f;               // The delay between the end of RoundPlaying and RoundEnding phases.
 	public CameraControl m_CameraControl;       // Reference to the CameraControl script for control during different phases.
 	public Text m_MessageText;                  // Reference to the overlay Text to display winning text, etc.
+	public GameObject[] m_TankPrefabs;
+	public TankManager[] m_Tanks;
+	public List<Transform> wayPointsForAI;
 		
 	private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
 	private WaitForSeconds m_EndWait;           // Used to have a delay whilst the round or game ends.
 
-	public GameObject[] m_TankPrefabs;
-	public TankManager[] m_Tanks;
-	public List<Transform> wayPointsForAI;
 
 	private void Start()
 	{
