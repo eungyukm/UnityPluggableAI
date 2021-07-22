@@ -123,7 +123,7 @@ public class GameManager : MonoBehaviour
 		m_MessageText.text = string.Empty;
 
 		// While there is not one tank left...
-		while (!GameSettings.Instance.ShouldFinishRound())
+		while (!OneTankLeft())
 		{
 			// ... return on the next frame.
 			yield return null;
@@ -136,14 +136,39 @@ public class GameManager : MonoBehaviour
 		// Stop tanks from moving.
 		DisableTankControl ();
 
-		var winner = GameSettings.Instance.OnEndRound();
+		m_RoundWinner = null;
+
+		// See if there is a winner now the round is over.
+		m_RoundWinner = GetRoundWinner();
+
+		if (m_RoundWinner != null)
+			m_RoundWinner.m_Wins++;
+
+		m_GameWinner = GetGameWinner();
 
 		// Get a message based on the scores and whether or not there is a game winner and display it.
-		string message = EndMessage ();
+		string message = EndMessage();
 		m_MessageText.text = message;
 
 		// Wait for the specified length of time until yielding control back to the game loop.
 		yield return m_EndWait;
+	}
+
+	private bool OneTankLeft()
+	{
+		// Start the count of tanks left at zero.
+		int numTanksLeft = 0;
+
+		// Go through all the tanks...
+		for (int i = 0; i < m_Tanks.Length; i++)
+		{
+			// ... and if they are active, increment the counter.
+			if (m_Tanks[i].m_Instance.activeSelf)
+				numTanksLeft++;
+		}
+
+		// If there are one or fewer tanks remaining return true, otherwise return false.
+		return numTanksLeft <= 1;
 	}
 
 	private TankManager GetRoundWinner()
