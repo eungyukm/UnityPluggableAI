@@ -14,9 +14,11 @@ public class GameManager : MonoBehaviour
 	public GameObject[] m_TankPrefabs;
 	public TankManager[] m_Tanks;
 	public List<Transform> wayPointsForAI;
-		
+
 	private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
 	private WaitForSeconds m_EndWait;           // Used to have a delay whilst the round or game ends.
+	private TankManager m_RoundWinner;          // Reference to the winner of the current round.  Used to make an announcement of who won.
+	private TankManager m_GameWinner;           // Reference to the winner of the game.  Used to make an announcement of who won.
 
 
 	private void Start()
@@ -87,18 +89,18 @@ public class GameManager : MonoBehaviour
 		// This code is not run until 'RoundEnding' has finished.  At which point, check if a game winner has been found.
 		if (GameSettings.Instance.ShouldFinishGame())
 		{
-			SceneManager.LoadScene (2);
+			SceneManager.LoadScene (0);
 		}
 		else
 		{
-			SceneManager.LoadScene(1, LoadSceneMode.Single);
+			StartCoroutine(GameLoop());
 		}
 	}
 
 
 	private IEnumerator RoundStarting ()
 	{
-		// As soon as the round starts reset the tanks and make sure they can't move.
+		ResetAllTanks();
 		DisableTankControl ();
 
 		// Snap the camera's zoom and position to something appropriate for the reset tanks.
@@ -137,17 +139,74 @@ public class GameManager : MonoBehaviour
 		var winner = GameSettings.Instance.OnEndRound();
 
 		// Get a message based on the scores and whether or not there is a game winner and display it.
-		string message = EndMessage (winner);
+		string message = EndMessage ();
 		m_MessageText.text = message;
 
 		// Wait for the specified length of time until yielding control back to the game loop.
 		yield return m_EndWait;
 	}
 
-	// Returns a string message to display at the end of each round.
-	private string EndMessage(TankThinker winner)
+	private TankManager GetRoundWinner()
 	{
-		return winner != null ? winner.player.PlayerInfo.GetColoredName() + " WINS THE ROUND!" : "DRAW!";
+		// Go through all the tanks...
+		for (int i = 0; i < m_Tanks.Length; i++)
+		{
+			// ... and if one of them is active, it is the winner so return it.
+			if (m_Tanks[i].m_Instance.activeSelf)
+				return m_Tanks[i];
+		}
+
+		// If none of the tanks are active it is a draw so return null.
+		return null;
+	}
+
+
+	// This function is to find out if there is a winner of the game.
+	private TankManager GetGameWinner()
+	{
+		// Go through all the tanks...
+		for (int i = 0; i < m_Tanks.Length; i++)
+		{
+			// ... and if one of them has enough rounds to win the game, return it.
+			if (m_Tanks[i].m_Wins == m_NumRoundsToWin)
+				return m_Tanks[i];
+		}
+
+		// If no tanks have enough rounds to win, return null.
+		return null;
+	}
+
+	private string EndMessage()
+	{
+		// By default when a round ends there are no winners so the default end message is a draw.
+		string message = "DRAW!";
+
+		// If there is a winner then change the message to reflect that.
+		if (m_RoundWinner != null)
+			message = m_RoundWinner.m_ColoredPlayerText + " WINS THE ROUND!";
+
+		// Add some line breaks after the initial message.
+		message += "\n\n\n\n";
+
+		// Go through all the tanks and add each of their scores to the message.
+		for (int i = 0; i < m_Tanks.Length; i++)
+		{
+			message += m_Tanks[i].m_ColoredPlayerText + ": " + m_Tanks[i].m_Wins + " WINS\n";
+		}
+
+		// If there is a game winner, change the entire message to reflect that.
+		if (m_GameWinner != null)
+			message = m_GameWinner.m_ColoredPlayerText + " WINS THE GAME!";
+
+		return message;
+	}
+
+	private void ResetAllTanks()
+	{
+		for (int i = 0; i < m_Tanks.Length; i++)
+		{
+			m_Tanks[i].Reset();
+		}
 	}
 
 	private void EnableTankControl()
